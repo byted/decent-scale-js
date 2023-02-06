@@ -1,116 +1,68 @@
+<!DOCTYPE html>
 <html>
-<script>
-    const UUID_DECENT_SCALE_SVC = 0xFFF0;
-    const UUID_DECENT_SCALE_READ = 0xFFF4;
-    const UUID_DECENT_SCALE_WRITE = 0x36f5;
-    const UUID_DECENT_SCALE_WRITEBACK = '83cdc3d4-3ba2-13fc-cc5e-106c351a9352'
-
-    const CMD_DISPLAY_ON = new Uint8Array([0x03, 0x0A, 0x01, 0x01, 0x00, 0x00, 0x09])
-    const CMD_DISPLAY_OFF = new Uint8Array([0x03, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x09])
-
-    class Scale {
-        async connect() {
-            const options = {
-                filters: [
-                    { name: 'Decent Scale' }
-                ],
-                optionalServices: [UUID_DECENT_SCALE_SVC]
-            }
-
-            try {
-                this.device = await navigator.bluetooth.requestDevice(options);
-                this.server = await this.device.gatt.connect();
-                this.svc = await this.server.getPrimaryService(UUID_DECENT_SCALE_SVC);
-                this.reader = await this.svc.getCharacteristic(UUID_DECENT_SCALE_READ);
-                this.writer = await this.svc.getCharacteristic(UUID_DECENT_SCALE_WRITE);
-
-                this.printStatus();
-            } catch (error) {
-                console.log('Argh! ' + error);
-            }
-        }
-
-        async disconnect() {
-            this.device.gatt.disconnect();
-        }
-
-        async write(cmd) {
-            await this.writer.writeValue(cmd);
-        }
-
-        async read() {
-            await this.reader.startNotifications();
-            this.reader.addEventListener('characteristicvaluechanged',
-                (event) => {
-                    let weight = event.target.value.getInt16(2) / 10;
-                    let change = event.target.value.getUint8(1) == 0xCA;
-                    document.getElementById("weight").innerText = weight.toFixed(1).padStart(5);
-                }
-            )
-        }
-
-        async readStop() {
-            await this.reader.stopNotifications();
-        }
-
-        async printStatus() {
-            console.log('> Name:             ' + this.device.name);
-            console.log('> Id:               ' + this.device.id);
-            console.log('> Connected:        ' + this.device.gatt.connected);
-        }
-    }
-
-    const scale = new Scale();
-    const initScale = async () => {
-        document.getElementById("initBtn").style.display = "none";
-        document.getElementById("footer").innerHTML = "Connecting...";
-        document.getElementById("screen").style.display = "block";
-
-        await scale.connect();
-        try {
-            await scale.write(CMD_DISPLAY_ON);
-            await scale.read();
-        } catch(err) {
-            console.log(err);
-            document.getElementById("initBtn").innerText = 'Error; reload page to try again'
-        }
-        document.getElementById("footer").innerHTML = "grams";
-    }
-
-</script>
-
 <head>
+    <script type="module">
+        import { Scale, CMD_DISPLAY_ON } from './decent-scale.js';
+    
+        let scale;
+        try {
+            scale = new Scale();
+        } catch(err) {
+            document.getElementById('initBtn').style.display = 'none';
+            document.getElementById('footer').style.display = 'block';
+            document.getElementById('footer').innerHTML = 'Your browser doesn\'t support Web Bluetooth. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility">Try one of those</a>';
+        }
+    
+        const initScale = async () => {
+            document.getElementById('initBtn').style.display = 'none';
+            document.getElementById('display-1').style.display = 'block';
+            document.getElementById('footer').style.display = 'block';
+            document.getElementById('footer').innerHTML = 'Connecting...';
+    
+            try {
+                await scale.connect();
+                await scale.sendCommand(CMD_DISPLAY_ON);
+                await scale.subscribe({
+                    onWeightMeasurement: (weight, _) => {
+                        document.getElementById("display-1").innerText = weight.toFixed(1).padStart(5);
+                    }
+                });
+                document.getElementById('footer').innerHTML = 'grams';
+            } catch(err) {
+                console.log(err);
+                document.getElementById('display-1').style.display = 'none';
+                document.getElementById('footer').innerText = 'Error connecting to the scale. Reload page to try again.';
+            }
+        }
+
+        document.getElementById('initBtn').addEventListener('click', initScale);
+    </script>
     <style>
-        body { text-align: center; }
-        #initBtn { 
+        body {
             margin-top: 5rem;
+            text-align: center;
+            font-family: monospace;
+        }
+        #initBtn { 
             font-size: 8rem;
         }
-        #screen {
-            text-align: center;
-            font-size: 5rem;
-            font-family: monospace;
-            display: none;
-        }
-        #weight {
+
+        #display-1 {
             font-size: 20rem;
             white-space: pre;
+            display: none;
+        }
+        #footer {
+            font-size: 5rem;
+            display: none;
         }
     </style>
 </head>
 
 <body>
-    <!-- <button onclick="initScale()">Connect</button>
-    <button onclick="scale.disconnect()">Disconnect</button>
-    <button onclick="scale.write(CMD_DISPLAY_ON)">Write</button>
-    <button onclick="scale.read()">Read</button>
-    <button onclick="scale.readStop()">Read Stop</button> -->
-
-    <button id="initBtn" onclick="initScale()">Connect Scale</button>
-    <div id="screen">
-        <div id="weight">---.-</div>
-        <div id="footer">grams</div>
-    </div>
+    <button id="initBtn">Connect Scale</button>
+    <div id="display-1">---.-</div>
+    <div id="footer">grams</div>
 </body>
 
 </html>
