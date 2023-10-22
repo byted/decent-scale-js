@@ -2,6 +2,8 @@
 
 (currently all code resides in brnach `gh-pages`)
 
+Demo at https://byted.github.io/decent-scale-js/
+
 ## Features
 - connect to scale
 - read weight & weight change from scale (all firmware versions)
