@@ -9,29 +9,30 @@
             scale = new Scale();
         } catch(err) {
             document.getElementById('initBtn').style.display = 'none';
-            document.getElementById('footer').style.display = 'block';
-            document.getElementById('footer').innerHTML = 'Your browser doesn\'t support Web Bluetooth. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility">Try one of those</a>';
+            document.getElementById('botification').innerHTML = 'Your browser doesn\'t support Web Bluetooth. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility">Try one of those</a>';
         }
     
         const initScale = async () => {
             document.getElementById('initBtn').style.display = 'none';
-            document.getElementById('display-1').style.display = 'block';
-            document.getElementById('footer').style.display = 'block';
-            document.getElementById('footer').innerHTML = 'Connecting...';
+            document.getElementById('notification').innerHTML = 'Connecting...';
     
             try {
                 await scale.connect();
                 await scale.sendCommand(CMD_DISPLAY_ON);
                 await scale.subscribe({
-                    onWeightMeasurement: (weight, _) => {
-                        document.getElementById("display-1").innerText = weight.toFixed(1).padStart(5);
+                    onWeightMeasurement: (_, weight, gramsPerSecond) => {
+                        document.querySelector("#display-1 > .display").innerText = weight.toFixed(1).padStart(5);
+                        document.querySelector("#display-2 > .display").innerText = gramsPerSecond.toFixed(1).padStart(5);
                     }
                 });
-                document.getElementById('footer').innerHTML = 'grams';
+                document.getElementById('notification').innerHTML = '';
+
+                document.getElementById('display-1').style.display = 'block';
+                document.getElementById('display-2').style.display = 'block';
             } catch(err) {
                 console.log(err);
                 document.getElementById('display-1').style.display = 'none';
-                document.getElementById('footer').innerText = 'Error connecting to the scale. Reload page to try again.';
+                document.getElementById('notification').innerText = 'Error connecting to the scale. Reload page to try again.';
             }
         }
 
@@ -46,23 +47,35 @@
         #initBtn { 
             font-size: 8rem;
         }
-
-        #display-1 {
-            font-size: 20rem;
-            white-space: pre;
+        #display-1, #display-2 {
             display: none;
         }
-        #footer {
+
+        #display-1 > .display, #display-2 > .display {
+            font-size: 20rem;
+            white-space: pre;
+        }
+        .footer  {
             font-size: 5rem;
-            display: none;
+        }
+        #notification {
+            font-size: 5rem;
         }
     </style>
 </head>
 
 <body>
     <button id="initBtn">Connect Scale</button>
-    <div id="display-1">---.-</div>
-    <div id="footer">grams</div>
+    <div id="notification"></div>
+    <div id="display-1">
+        <div class="display">---.-</div>
+        <div class="footer">g</div>
+    </div>
+    <div id="display-2">
+        <div class="display">---.-</div>
+        <div class="footer">g/s</div>
+    </div>
+
 </body>
 
 </html>

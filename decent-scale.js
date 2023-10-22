@@ -27,6 +27,7 @@ class Scale {
         this.svc = await this.server.getPrimaryService(UUID_DECENT_SCALE_SVC);
         this.reader = await this.svc.getCharacteristic(UUID_DECENT_SCALE_READ);
         this.writer = await this.svc.getCharacteristic(UUID_DECENT_SCALE_WRITE);
+        this.lastWeightGrams = 0;
     }
 
     async disconnect() {
@@ -43,11 +44,14 @@ class Scale {
             'characteristicvaluechanged',
             (event) => {
                 if ([0xCA, 0xCE].includes(event.target.value.getUint8(1))) {
-                    // weight measurement
-                    let weight = event.target.value.getInt16(2) / 10;
-                    let changed = event.target.value.getUint8(1) === 0xCA;
+                    const changed = event.target.value.getUint8(1) === 0xCA;
+                    const weightGrams = event.target.value.getInt16(2) / 10;            // Decent reports values * 10
+                    const gramsPerSecond = (weightGrams - this.lastWeightGrams) * 10    // Decent reports 10Hz so extrapolate
+
+                    this.lastWeightGrams = weightGrams
+
                     if(handlers.onWeightMeasurement) {
-                        handlers.onWeightMeasurement(weight, changed);
+                        handlers.onWeightMeasurement(changed, weightGrams, gramsPerSecond);
                     }
                 }
             }
