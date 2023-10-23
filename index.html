@@ -9,7 +9,7 @@
             scale = new Scale();
         } catch(err) {
             document.getElementById('initBtn').style.display = 'none';
-            document.getElementById('botification').innerHTML = 'Your browser doesn\'t support Web Bluetooth. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility">Try one of those</a>';
+            document.getElementById('notification').innerHTML = 'Your browser doesn\'t support Web Bluetooth. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility">Try one of those</a>';
         }
     
         const initScale = async () => {
@@ -40,39 +40,48 @@
     </script>
     <style>
         body {
+            padding-top: 2rem;
+            font-size: 3rem;
             text-align: center;
             font-family: monospace;
         }
         #initBtn { 
-            font-size: 5rem;
+            background-color: #2BAB6E;
+            padding: 1rem;
+            border-radius: 5px;
+            border: none;
+            color: white;
+            font-size: 3rem;
+        }
+        #initBtn:hover {
+            box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0;
+            text-decoration: underline;
         }
         #display-1, #display-2 {
             display: none;
+        }
+        #display-container {
         }
 
         #display-1 > .display, #display-2 > .display {
             font-size: 15rem;
             white-space: pre;
         }
-        .footer  {
-            font-size: 3rem;
-        }
-        #notification {
-            font-size: 3rem;
-        }
     </style>
 </head>
 
 <body>
-    <button id="initBtn">Connect Scale</button>
+    <button id="initBtn">Click to connect Decent Scale</button>
     <div id="notification"></div>
-    <div id="display-1">
-        <div class="display">---.-</div>
-        <div class="footer">g</div>
-    </div>
-    <div id="display-2">
-        <div class="display">---.-</div>
-        <div class="footer">g/s</div>
+    <div id="display-container">
+        <div id="display-1">
+            <div class="display">---.-</div>
+            <div class="footer">g</div>
+        </div>
+        <div id="display-2">
+            <div class="display">---.-</div>
+            <div class="footer">g/s</div>
+        </div>
     </div>
 
 </body>
