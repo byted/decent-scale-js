@@ -1,0 +1,23 @@
+{
+  "name": "decent-scale",
+  "version": "1.0.0",
+  "description": "(currently all code resides in brnach `gh-pages`)",
+  "main": "decent-scale.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byted/decent-scale-js.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/byted/decent-scale-js/issues"
+  },
+  "homepage": "https://github.com/byted/decent-scale-js#readme",
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
+}
