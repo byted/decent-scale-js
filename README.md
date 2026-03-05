@@ -1,7 +1,5 @@
 # decent-scale-js
 
-(currently all code resides in brnach `gh-pages`)
-
 Demo at https://byted.github.io/decent-scale-js/
 
 ## Features
